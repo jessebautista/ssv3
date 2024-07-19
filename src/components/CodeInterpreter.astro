@@ -31,32 +31,43 @@
     let storeId = '';
     let publicKey = '';
   
-    const queryInput = document.getElementById('queryInput');
-    const runQueryBtn = document.getElementById('runQueryBtn');
-    const resultElement = document.getElementById('result');
+    const queryInput = document.getElementById('queryInput') as HTMLTextAreaElement;
+    const runQueryBtn = document.getElementById('runQueryBtn') as HTMLButtonElement;
+    const resultElement = document.getElementById('result') as HTMLElement;
   
-    document.addEventListener('saveSettings', (e) => {
+    document.addEventListener('saveSettings', ((e: CustomEvent) => {
       storeId = e.detail.storeId;
       publicKey = e.detail.publicKey;
       swell.init(storeId, publicKey);
-      resultElement.textContent = 'Swell initialized successfully';
-    });
-  
-    runQueryBtn.addEventListener('click', async () => {
-      if (!storeId || !publicKey) {
-        resultElement.textContent = 'Please set Store ID and Public Key in the settings first.';
-        return;
+      if (resultElement) {
+        resultElement.textContent = 'Swell initialized successfully';
       }
+    }) as EventListener);
   
-      try {
-        const query = queryInput.value;
-        // Use Function constructor to create a function from the input string
-        const queryFunction = new Function('swell', `return ${query}`);
-        const result = await queryFunction(swell);
-        resultElement.textContent = JSON.stringify(result, null, 2);
-      } catch (error) {
-        resultElement.textContent = `Error: ${error.message}`;
-      }
-    });
+    if (runQueryBtn) {
+      runQueryBtn.addEventListener('click', async () => {
+        if (!storeId || !publicKey) {
+          if (resultElement) {
+            resultElement.textContent = 'Please set Store ID and Public Key in the settings first.';
+          }
+          return;
+        }
+  
+        try {
+          const query = queryInput?.value;
+          if (query) {
+            // Use Function constructor to create a function from the input string
+            const queryFunction = new Function('swell', `return ${query}`);
+            const result = await queryFunction(swell);
+            if (resultElement) {
+              resultElement.textContent = JSON.stringify(result, null, 2);
+            }
+          }
+        } catch (error) {
+          if (resultElement && error instanceof Error) {
+            resultElement.textContent = `Error: ${error.message}`;
+          }
+        }
+      });
+    }
   </script>
-  
