@@ -1,0 +1,62 @@
+---
+// src/components/CodeInterpreter.astro
+---
+
+<div class="code-interpreter-section p-6">
+    <h2 class="text-xl font-semibold mb-4 text-gray-200">Code Interpreter</h2>
+    <div class="pb-4 text-gray-200">
+      <div class="mb-4">
+        <textarea
+          id="queryInput"
+          rows="4"
+          placeholder="Enter your Swell.js query here (e.g., swell.products.list({limit: 25, page: 1}))"
+          class="py-3 px-4 block w-full border-gray-700 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-700 text-gray-200"
+        ></textarea>
+        <button
+          id="runQueryBtn"
+          class="mt-2 py-3 px-4 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all text-sm dark:focus:ring-offset-gray-800"
+        >
+          Run Query
+        </button>
+      </div>
+      <div class="bg-gray-700 p-4 rounded-md">
+        <pre><code id="result" class="language-json block whitespace-pre-wrap text-gray-200"></code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    import swell from 'swell-js';
+  
+    let storeId = '';
+    let publicKey = '';
+  
+    const queryInput = document.getElementById('queryInput');
+    const runQueryBtn = document.getElementById('runQueryBtn');
+    const resultElement = document.getElementById('result');
+  
+    document.addEventListener('saveSettings', (e) => {
+      storeId = e.detail.storeId;
+      publicKey = e.detail.publicKey;
+      swell.init(storeId, publicKey);
+      resultElement.textContent = 'Swell initialized successfully';
+    });
+  
+    runQueryBtn.addEventListener('click', async () => {
+      if (!storeId || !publicKey) {
+        resultElement.textContent = 'Please set Store ID and Public Key in the settings first.';
+        return;
+      }
+  
+      try {
+        const query = queryInput.value;
+        // Use Function constructor to create a function from the input string
+        const queryFunction = new Function('swell', `return ${query}`);
+        const result = await queryFunction(swell);
+        resultElement.textContent = JSON.stringify(result, null, 2);
+      } catch (error) {
+        resultElement.textContent = `Error: ${error.message}`;
+      }
+    });
+  </script>
+  

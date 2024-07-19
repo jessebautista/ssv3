@@ -11,17 +11,18 @@ export default defineConfig({
 			},
 			sidebar: [
 				{
-					label: 'Guides',
-					items: [
-						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', slug: 'guides/example' },
-					],
+					label: 'Customer Service Processes',
+					autogenerate: { directory: 'CSP' },
 				},
 				{
-					label: 'Reference',
-					autogenerate: { directory: 'reference' },
+					label: 'Technical Guide',
+					autogenerate: { directory: 'TG' },
 				},
 			],
+			components: {
+				// Override the default TOC component.
+				TableOfContents: './src/components/CodeInterpreter.astro',
+			  },
 		}),
 	],
 });
